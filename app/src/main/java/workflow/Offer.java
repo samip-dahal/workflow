@@ -1,64 +1,70 @@
 package workflow;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class Offer {
-    private final String productId;
-    private final String productName;
-    private final int productQuantity;
-    private double productPrice;
-    private OfferState state;
+    private final String offerId;
+    private OfferState currentState;
     private final String buyerUserId;
     private final String sellerUserId;
+    private final Deque<OfferDetails> listOfOffers;
+    private final Deque<OfferState> offerStates;
 
-    private Offer(String productId, String productName, int productQuantity, double productPrice, String buyerUserId, String sellerUserId){
-        this.productId = productId;
-        this.productName = productName;
-        this.productQuantity = productQuantity;
-        this.productPrice = productPrice;
+    private Offer(final String buyerUserId, final String sellerUserId, final OfferDetails offerDetails){
+        this.offerId = Utilities.generateUniqueId();
         this.buyerUserId = buyerUserId;
         this.sellerUserId = sellerUserId;
-        this.state = OfferState.SUBMIT;
+        this.currentState = OfferState.AWAITING_SELLER_ACCEPTANCE;
+        this.listOfOffers = new ArrayDeque<>();
+        addOfferDetails(offerDetails);
+        this.offerStates = new ArrayDeque<>();
+        addOfferState(currentState);
     }
 
-    public static Offer of(String productId, String productName, int productQuantity, double productPrice, String buyerUserId, String sellerUserId){
-        return new Offer(productId, productName, productQuantity, productPrice, buyerUserId, sellerUserId);
+    public static Offer of(final String buyerUserId, final String sellerUserId, final OfferDetails offerDetails){
+        return new Offer(buyerUserId, sellerUserId, offerDetails);
     }
 
-    public String getProductId() {
-        return this.productId;
+    public String getOfferId() {
+        return this.offerId;
     }
 
-    public String getProductName() {
-        return this.productName;
+    public OfferState getCurrentState() {
+        return this.currentState;
     }
 
-    public int getProductQuantity() {
-        return this.productQuantity;
+    public void transition(OfferState newState) {
+        this.currentState = newState;
+        addOfferState(newState);
     }
 
-    public double getProductPrice() {
-        return this.productPrice;
+    public void addOfferState(final OfferState offerState){
+        this.offerStates.addLast(offerState);
     }
 
-    public OfferState getState() {
-        return this.state;
+    public void addOfferDetails(final OfferDetails offerDetails){
+        this.listOfOffers.addLast(offerDetails);
     }
 
-    public void updatePrice(double newPrice) {
-        this.productPrice = newPrice;
-    }
-
-    public void transitionToThisState(OfferState state) {
-        if (!this.state.canTransitionToThisState(state)) {
-            throw new InvalidStateTransitionException("State transition from " + this.state + " to " + state + " is not allowed.");
-        }
-        this.state = state;
-    }
-
-    public String getBuyerId() {
+    public String getBuyerUserId() {
         return this.buyerUserId;
     }
 
-    public String getSellerId() {
+    public String getSellerUserId() {
         return this.sellerUserId;
     }
+
+    public boolean isBuyer(final String userId){
+        return this.buyerUserId.equals(userId);
+    }
+
+    public Deque<OfferState> getOfferStates() {
+        return this.offerStates;
+    }
+
+    public OfferDetails getLastOfferDetails() {
+        return this.listOfOffers.getLast();
+    }
+
 }
