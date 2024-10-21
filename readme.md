@@ -29,6 +29,6 @@ This is a design for a haggling platform where a user can submit an offer to ano
   - `DashboardRow.java`: Represents a row in a dashboard view.
 
 ## Assumptions
-  - Private data for a user is associated with an offer. It is maintained inside the offer history for an offer.
   - Offer maintains a list of offer history which is used for the dashboard view.
+  - Private data for a user is associated with an offer. It is maintained inside the offer history for an offer.
   - All implementations for the workflow and dashboard are done in OfferService.java and DashboardService.java respectively.
