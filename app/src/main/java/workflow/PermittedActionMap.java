@@ -1,16 +1,18 @@
 package workflow;
 
 import java.util.Map;
+
+import workflow.exceptions.InvalidNextActionException;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public final class PermittedActionMap {
+final class PermittedActionMap {
     private static Map<OfferState, List<Action>> buyerPermittedActions = new HashMap<>();
     private static Map<OfferState, List<Action>> sellerPermittedActions = new HashMap<>();
 
-    public static void checkAction(final OfferState currentState, final Action nextAction, boolean isBuyer){
+    static void checkAction(final OfferState currentState, final Action nextAction, boolean isBuyer){
         List<Action> permittedActions = isBuyer
                 ? buyerPermittedActions.get(currentState)
                 : sellerPermittedActions.get(currentState);
@@ -27,29 +29,29 @@ public final class PermittedActionMap {
 
     private static void initializePermittedActions() {
         buyerPermittedActions.put(OfferState.AWAITING_SELLER_ACCEPTANCE, 
-            Arrays.asList(Action.WITHDRAW, Action.CANCEL));
+            Arrays.asList(Action.WITHDRAW, Action.CANCEL, Action.UPDATE_PRIVATE_DATA));
         buyerPermittedActions.put(OfferState.AWAITING_BUYER_ACCEPTANCE, 
-            Arrays.asList(Action.ACCEPT, Action.CANCEL, Action.PROPOSE_UPDATE));
+            Arrays.asList(Action.ACCEPT, Action.CANCEL, Action.PROPOSE_UPDATE, Action.UPDATE_PRIVATE_DATA));
         buyerPermittedActions.put(OfferState.WITHDRAWN_BY_SELLER, 
-            Arrays.asList(Action.CANCEL));
+            Arrays.asList(Action.CANCEL, Action.UPDATE_PRIVATE_DATA));
         buyerPermittedActions.put(OfferState.WITHDRAWN_BY_BUYER, 
-            Arrays.asList(Action.CANCEL, Action.PROPOSE_UPDATE));
+            Arrays.asList(Action.CANCEL, Action.PROPOSE_UPDATE, Action.UPDATE_PRIVATE_DATA));
         buyerPermittedActions.put(OfferState.ACCEPTED, 
-            Collections.emptyList()); 
+            Arrays.asList(Action.UPDATE_PRIVATE_DATA)); 
         buyerPermittedActions.put(OfferState.CANCELLED, 
-            Collections.emptyList()); 
+        Arrays.asList(Action.UPDATE_PRIVATE_DATA)); 
 
         sellerPermittedActions.put(OfferState.AWAITING_BUYER_ACCEPTANCE, 
-            Arrays.asList(Action.WITHDRAW, Action.CANCEL));
+            Arrays.asList(Action.WITHDRAW, Action.CANCEL, Action.UPDATE_PRIVATE_DATA));
         sellerPermittedActions.put(OfferState.AWAITING_SELLER_ACCEPTANCE, 
-            Arrays.asList(Action.ACCEPT, Action.CANCEL, Action.PROPOSE_UPDATE));
+            Arrays.asList(Action.ACCEPT, Action.CANCEL, Action.PROPOSE_UPDATE, Action.UPDATE_PRIVATE_DATA));
         sellerPermittedActions.put(OfferState.WITHDRAWN_BY_BUYER, 
-            Arrays.asList(Action.CANCEL));
+            Arrays.asList(Action.CANCEL, Action.UPDATE_PRIVATE_DATA));
         sellerPermittedActions.put(OfferState.WITHDRAWN_BY_SELLER, 
-            Arrays.asList(Action.CANCEL, Action.PROPOSE_UPDATE));
+            Arrays.asList(Action.CANCEL, Action.PROPOSE_UPDATE, Action.UPDATE_PRIVATE_DATA));
         sellerPermittedActions.put(OfferState.ACCEPTED, 
-            Collections.emptyList());
+        Arrays.asList(Action.UPDATE_PRIVATE_DATA));
         sellerPermittedActions.put(OfferState.CANCELLED, 
-            Collections.emptyList()); 
+        Arrays.asList(Action.UPDATE_PRIVATE_DATA)); 
     }
 }

@@ -1,7 +1,24 @@
-package workflow;
+package workflow.servicesapiimpl;
 
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+
+import workflow.exceptions.InvalidNextActionException;
+import workflow.exceptions.InvalidOfferException;
+import workflow.exceptions.InvalidStateTransitionException;
+import workflow.exceptions.InvalidUserException;
+
+import workflow.servicesapi.IOfferService;
+import workflow.Offer;
+import workflow.OfferDetails;
+import workflow.OfferState;
+import workflow.Action;
 
 public class OfferService implements IOfferService {
 
@@ -15,13 +32,13 @@ public class OfferService implements IOfferService {
         }
     }
 
-    Offer getOffer(String offerId) {
+    public Offer getOffer(String offerId) {
         return offerMap.get(offerId);
     }
 
     private void validateOfferDetails(final OfferDetails offerDetails) {
         if (offerDetails.getProductName() == null) {
-            throw new IllegalArgumentException("Invalid product name");
+            throw new IllegalArgumentException("Product name cannot be null");
         }
         if (offerDetails.getProductQuantity() < 0) {
             throw new IllegalArgumentException("Product quantity cannot be a negative value");
@@ -31,7 +48,7 @@ public class OfferService implements IOfferService {
         }
     }
 
-    private Offer getOfferFromUserId(final String userId) {
+    Offer getOfferFromUserId(final String userId) {
         String offerId = buyerToOfferMap.get(userId);
         if (offerId == null) {
             offerId = sellerToOfferMap.get(userId);
@@ -44,7 +61,8 @@ public class OfferService implements IOfferService {
 
     @Override
     public String submit(String buyerUserId, String sellerUserId, OfferDetails offerDetails) {
-        //do I need to check that an offer for a user is already in progress and then allow to submit another offer
+        // check that an offer for a user is already in progress and then allow to
+        // submit another offer
         validateOfferDetails(offerDetails);
 
         validateUser(buyerUserId);
@@ -54,7 +72,7 @@ public class OfferService implements IOfferService {
                 buyerUserId,
                 sellerUserId,
                 offerDetails);
-        
+
         offerMap.put(offer.getOfferId(), offer);
         buyerToOfferMap.put(buyerUserId, offer.getOfferId());
         sellerToOfferMap.put(sellerUserId, offer.getOfferId());
@@ -63,33 +81,27 @@ public class OfferService implements IOfferService {
     }
 
     @Override
-    public void accept(String userId) throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
+    public void accept(String userId)
+            throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
         validateUser(userId);
 
         Offer offer = getOfferFromUserId(userId);
 
         boolean isBuyer = offer.isBuyer(userId);
-
-        PermittedActionMap.checkAction(offer.getCurrentState(), Action.ACCEPT, isBuyer);
-        StateTransitionMap.checkTransition(offer.getCurrentState(), OfferState.ACCEPTED, isBuyer);
-        offer.transition(OfferState.ACCEPTED);
-
-        offer.addOfferDetails(offer.getLastOfferDetails());
+        
+        offer.transition(OfferState.ACCEPTED, offer.getCurrentState(), Action.ACCEPT, userId, isBuyer);
     }
 
     @Override
-    public void cancel(String userId) throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
+    public void cancel(String userId)
+            throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
         validateUser(userId);
 
         Offer offer = getOfferFromUserId(userId);
 
         boolean isBuyer = offer.isBuyer(userId);
-
-        PermittedActionMap.checkAction(offer.getCurrentState(), Action.CANCEL, isBuyer);
-        StateTransitionMap.checkTransition(offer.getCurrentState(), OfferState.CANCELLED, isBuyer);
-        offer.transition(OfferState.CANCELLED);
-
-        offer.addOfferDetails(offer.getLastOfferDetails());
+        
+        offer.transition(OfferState.CANCELLED, offer.getCurrentState(), Action.CANCEL, userId, isBuyer);
     }
 
     @Override
@@ -102,26 +114,25 @@ public class OfferService implements IOfferService {
         boolean isBuyer = offer.isBuyer(userId);
         OfferState newState = isBuyer ? OfferState.AWAITING_SELLER_ACCEPTANCE : OfferState.AWAITING_BUYER_ACCEPTANCE;
 
-        PermittedActionMap.checkAction(offer.getCurrentState(), Action.PROPOSE_UPDATE, isBuyer);
-        StateTransitionMap.checkTransition(offer.getCurrentState(), newState, isBuyer);
-        offer.transition(newState);
-
-        offer.addOfferDetails(offerDetails);
+        offer.transition(newState, offer.getCurrentState(), Action.PROPOSE_UPDATE, userId, offerDetails, isBuyer);
     }
 
     @Override
-    public void withdraw(String userId) throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
+    public void withdraw(String userId)
+            throws InvalidStateTransitionException, InvalidUserException, InvalidNextActionException {
         validateUser(userId);
 
         Offer offer = getOfferFromUserId(userId);
 
         boolean isBuyer = offer.isBuyer(userId);
         OfferState newState = isBuyer ? OfferState.WITHDRAWN_BY_BUYER : OfferState.WITHDRAWN_BY_SELLER;
+        
+        offer.transition(newState, offer.getCurrentState(), Action.WITHDRAW, userId, isBuyer);
+    }
 
-        PermittedActionMap.checkAction(offer.getCurrentState(), Action.WITHDRAW, isBuyer);
-        StateTransitionMap.checkTransition(offer.getCurrentState(), newState, isBuyer);
-        offer.transition(newState);
-
-        offer.addOfferDetails(offer.getLastOfferDetails());
+    @Override 
+    public void updatePrivateData(String userId, Map<String, String> privateData){
+        Offer offer = getOfferFromUserId(userId);
+        offer.updatePrivateData(userId, privateData);
     }
 }

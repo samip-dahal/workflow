@@ -5,6 +5,7 @@ public enum Action {
     ACCEPT,
     PROPOSE_UPDATE,
     WITHDRAW,
-    CANCEL
+    CANCEL,
+    UPDATE_PRIVATE_DATA
 }
 

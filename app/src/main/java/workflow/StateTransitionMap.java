@@ -1,16 +1,19 @@
 package workflow;
 
 import java.util.Map;
+
+import workflow.exceptions.InvalidStateTransitionException;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public final class StateTransitionMap {
+final class StateTransitionMap {
     private static Map<OfferState, List<OfferState>> buyerAllowedTransitions = new HashMap<>(); //set
     private static Map<OfferState, List<OfferState>> sellerAllowedTransitions = new HashMap<>();
 
-    public static void checkTransition(final OfferState currentState, final OfferState nextState, boolean isBuyer){
+    static void checkTransition(final OfferState currentState, final OfferState nextState, boolean isBuyer){
         List<OfferState> allowedTransitions = isBuyer
                 ? buyerAllowedTransitions.get(currentState)
                 : sellerAllowedTransitions.get(currentState);

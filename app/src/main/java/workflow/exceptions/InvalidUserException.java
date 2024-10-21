@@ -1,4 +1,4 @@
-package workflow;
+package workflow.exceptions;
 
 public class InvalidUserException extends RuntimeException{
     public InvalidUserException(String message){

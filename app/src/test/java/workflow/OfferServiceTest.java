@@ -5,6 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import workflow.Offer.OfferHistory;
+import workflow.exceptions.InvalidNextActionException;
+import workflow.servicesapiimpl.OfferService;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+
+
 public class OfferServiceTest {
     
     @Test
@@ -21,7 +30,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void submitThrowsExceptionOnInvalidArgument(){
+    void submitWithInvalidArgumentThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "123";
         final String sellerUserId = "456";
@@ -61,7 +70,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void noOrInvalidActionTakenAfterAccept(){
+    void invalidActionAfterAcceptThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "123";
         final String sellerUserId = "456";
@@ -103,7 +112,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void noOrInvalidActionTakenAfterCancel(){
+    void invalidActionAfterCancelThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "123";
         final String sellerUserId = "456";
@@ -147,7 +156,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void invalidActionAfterProposeUpdate(){
+    void invalidActionAfterProposeUpdateThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "123";
         final String sellerUserId = "456";
@@ -167,8 +176,12 @@ public class OfferServiceTest {
         final String buyerUserId = "123";
         final String sellerUserId = "456";
         final OfferDetails offerDetails = OfferDetails.of("Test", 5, 50); 
-        
+        final OfferDetails sellerUpdatedOffer = OfferDetails.of("Test", 5, 150);
+        final OfferDetails buyerUpdatedOffer = OfferDetails.of("Test", 5, 200);
+
         final String offerId = offerService.submit(buyerUserId, sellerUserId, offerDetails);
+        offerService.proposeUpdate(sellerUserId, sellerUpdatedOffer);
+        offerService.proposeUpdate(buyerUserId, buyerUpdatedOffer);
         offerService.withdraw(buyerUserId);
 
         assertEquals(offerService.getOffer(offerId).getCurrentState(), OfferState.WITHDRAWN_BY_BUYER);
@@ -190,7 +203,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void invalidActionAfterWithdraw(){
+    void invalidActionAfterWithdrawThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "123";
         final String sellerUserId = "456";
@@ -249,7 +262,7 @@ public class OfferServiceTest {
     }
 
     @Test
-    void exampleFourInvalidAction(){
+    void exampleFourInvalidActionThrowsException(){
         final OfferService offerService = new OfferService();
         final String buyerUserId = "Superman";
         final String sellerUserId = "Batman";
@@ -286,5 +299,64 @@ public class OfferServiceTest {
 
         offerService.accept(buyerUserId);
         assertEquals(offerService.getOffer(offerId).getCurrentState(), OfferState.ACCEPTED);
+    }
+
+    @Test
+    void buyerUpdatesPrivateData() {
+        final OfferService offerService = new OfferService();
+        final String buyerUserId = "123";
+        final String sellerUserId = "456";
+        final OfferDetails offerDetails = OfferDetails.of("Test", 5, 50); 
+        final Map<String, String> buyerPrivateData = new HashMap<>();
+        buyerPrivateData.put("reference", "123");
+
+        final String offerId = offerService.submit(buyerUserId, sellerUserId, offerDetails);
+        offerService.updatePrivateData(buyerUserId, buyerPrivateData);
+        final List<OfferHistory> history = offerService.getOffer(offerId).getOfferHistory();
+        final OfferHistory offerHistory = history.get(history.size() - 1);
+        final Map<String, String> expectedPrivateData = offerHistory.getPrivateData();
+
+        assertEquals(expectedPrivateData, buyerPrivateData);
+    }
+
+    @Test
+    void sellerUpdatesPrivateData() {
+        final OfferService offerService = new OfferService();
+        final String buyerUserId = "123";
+        final String sellerUserId = "456";
+        final OfferDetails offerDetails = OfferDetails.of("Test", 5, 50); 
+        final Map<String, String> sellerPrivateData = new HashMap<>();
+        sellerPrivateData.put("reference", "123");
+
+        final String offerId = offerService.submit(buyerUserId, sellerUserId, offerDetails);
+        final OfferDetails sellerUpdatedOffer = OfferDetails.of("Test", 5, 150);
+        offerService.proposeUpdate(sellerUserId, sellerUpdatedOffer);
+        offerService.updatePrivateData(sellerUserId, sellerPrivateData);
+
+        final List<OfferHistory> history = offerService.getOffer(offerId).getOfferHistory();
+        final OfferHistory offerHistory = history.get(history.size() - 1);
+        final Map<String, String> expectedPrivateData = offerHistory.getPrivateData();
+
+        assertEquals(expectedPrivateData, sellerPrivateData);
+    }
+
+    @Test 
+    void updatePrivateDataAfterEndStates() {
+        final OfferService offerService = new OfferService();
+        final String buyerUserId = "123";
+        final String sellerUserId = "456";
+        final OfferDetails offerDetails = OfferDetails.of("Test", 5, 50);
+        final Map<String, String> sellerPrivateData = new HashMap<>();
+        sellerPrivateData.put("reference", "456");
+
+        final String offerId = offerService.submit(buyerUserId, sellerUserId, offerDetails);
+        offerService.accept(sellerUserId);
+        offerService.updatePrivateData(sellerUserId, sellerPrivateData);
+
+        final List<Offer.OfferHistory> history = offerService.getOffer(offerId).getOfferHistory();
+        final Offer.OfferHistory offerHistory = history.get(history.size() - 1);
+        final Map<String, String> expectedPrivateData = offerHistory.getPrivateData();
+
+        assertEquals(sellerPrivateData, expectedPrivateData);
     }
 }
