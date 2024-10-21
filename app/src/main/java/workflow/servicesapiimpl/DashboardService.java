@@ -11,7 +11,7 @@ import workflow.DashboardRow;
 import workflow.Offer.OfferHistory;
 
 public class DashboardService implements IDashboardService {
-    OfferService offerService;
+    final OfferService offerService;
 
     public DashboardService(OfferService offerService){
         this.offerService = offerService;
