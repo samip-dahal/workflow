@@ -1,14 +1,7 @@
 package workflow.servicesapiimpl;
 
-import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-
 import workflow.exceptions.InvalidNextActionException;
 import workflow.exceptions.InvalidOfferException;
 import workflow.exceptions.InvalidStateTransitionException;
@@ -61,8 +54,6 @@ public class OfferService implements IOfferService {
 
     @Override
     public String submit(String buyerUserId, String sellerUserId, OfferDetails offerDetails) {
-        // check that an offer for a user is already in progress and then allow to
-        // submit another offer
         validateOfferDetails(offerDetails);
 
         validateUser(buyerUserId);

@@ -42,13 +42,13 @@ final class StateTransitionMap {
         sellerAllowedTransitions.put(OfferState.AWAITING_BUYER_ACCEPTANCE,
                 Arrays.asList(OfferState.WITHDRAWN_BY_SELLER, OfferState.CANCELLED));
         sellerAllowedTransitions.put(OfferState.AWAITING_SELLER_ACCEPTANCE,
-                Arrays.asList(OfferState.ACCEPTED, OfferState.CANCELLED, OfferState.AWAITING_BUYER_ACCEPTANCE)); // last param propose update
+                Arrays.asList(OfferState.ACCEPTED, OfferState.CANCELLED, OfferState.AWAITING_BUYER_ACCEPTANCE));
                                                                                                                  
         sellerAllowedTransitions.put(OfferState.ACCEPTED, Collections.emptyList());
         sellerAllowedTransitions.put(OfferState.CANCELLED, Collections.emptyList());
         sellerAllowedTransitions.put(OfferState.WITHDRAWN_BY_SELLER,
                 Arrays.asList(OfferState.AWAITING_BUYER_ACCEPTANCE, OfferState.CANCELLED));
-        sellerAllowedTransitions.put(OfferState.WITHDRAWN_BY_BUYER, Arrays.asList(OfferState.CANCELLED)); // I have to wait for the new offer
+        sellerAllowedTransitions.put(OfferState.WITHDRAWN_BY_BUYER, Arrays.asList(OfferState.CANCELLED));
 
     }
 }
