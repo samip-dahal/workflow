@@ -30,5 +30,6 @@ This is a design for a haggling platform where a user can submit an offer to ano
 
 ## Assumptions
   - Offer maintains a list of offer history which is used for the dashboard view.
-  - Private data for a user is associated with an offer. It is maintained inside the offer history for an offer.
+  - Private data for a user is associated with an offer. It is associated with a user and is stored within the offer history. 
   - All implementations for the workflow and dashboard are done in OfferService.java and DashboardService.java respectively.
+  - The system handles offers for both **buyers** and **sellers**, and the **state naming conventions** are aligned with the user roles in the offer negotiation. For example, states like `AWAITING_BUYER_ACCEPTANCE` and `AWAITING_SELLER_ACCEPTANCE` are used instead of generic names such as `AWAITING_MY_ACCEPTANCE` or `AWAITING_THEIR_ACCEPTANCE`. This role-specific naming convention is applied consistently across all states to improve clarity and ensure that the next responsible party is clearly identified during the negotiation process.
