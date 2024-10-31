@@ -1,7 +1,41 @@
 # Haggling Platform
 
 ## Overview
-This system is designed as a haggling platform where a user can submit an offer to another user to purchase their product. An offer contains essential details such as the name of the product, the quantity the buyer wants to purchase, and the proposed price. The haggling process is a dynamic, back-and-forth exchange between users, where negotiations continue until either both users agree to the offer details or one user decides to cancel the offer.
+This system is designed as a haggling platform where users can negotiate over product offers. An offer includes key details, such as the product name, desired quantity, and proposed price. Users engage in a back-and-forth exchange, with negotiations continuing until both users either reach an agreement on the offer details or one user decides to cancel the offer.
+
+To support the haggling process, this system enables the following actions:
+
+- `Submit`: A user can initiate a new offer by submitting the product details, including their user ID and the other user’s ID (the seller).
+
+- `Accept`: The receiving user can choose to accept the offer by providing their user ID, indicating agreement with the offer.
+
+- `Cancel`: Either user can cancel the offer at any point in the negotiation, permanently ending the offer by submitting their user ID.
+
+- `ProposeUpdate`: Users have the option to modify the existing offer details by proposing updates, which requires their user ID along with the revised offer details.
+
+- `Withdraw`: If a user wishes to make adjustments to the offer before it is accepted, they can withdraw it temporarily by submitting their user ID. Withdrawal indicates a pause for review or modification rather than a cancellation.
+
+- `UpdatePrivateData`: Users can update their personal, private data—stored as key-value pairs—linked to the offer. This private data is accessible only to the individual user and remains hidden from the other party involved in the transaction. Private data can be modified at any time, as it does not influence the ongoing negotiation process.
+
+The actions above transition the offer into various states, each representing a phase in the haggling process:
+
+- `AWAITING_SELLER_ACCEPTANCE`
+- `AWAITING_BUYER_ACCEPTANCE`
+- `ACCEPTED`
+- `CANCELLED`
+- `WITHDRAWN_BY_BUYER`  
+- `WITHDRAWN_BY_SELLER` 
+
+The final states (`ACCEPTED` and `CANCELLED`) are symmetrical and do not permit any actions that impact the offer state itself, except for private data updates. At any point before reaching an end state, users have the option to cancel the offer.
+
+When an offer is initially submitted, it enters the AWAITING_SELLER_ACCEPTANCE state from the perspective of both users involved in the transaction.
+
+The system's public API is designed to facilitate these core actions, allowing users to drive state changes as they progress through the haggling workflow. Each action includes the user ID of the individual executing it, specifying their role in the offer. The buyer (submitter) and seller IDs are defined at the beginning and remain constant throughout the offer's lifecycle.
+
+If an action is attempted by an unauthorized user (one whose ID does not match either the buyer or seller), the system will raise an exception or handle the invalid attempt appropriately. Additionally, if a user attempts an action that is not permitted in the current state, an exception will be triggered.
+
+Beyond core actions, the system provides APIs for users to view the offer history. One API allows access to previous versions of the offer, displaying private data as it existed at that time. Another API enables users to print a history table showing the full price, calculated as the product of quantity and price for each offer version.
+
 
 ## Project Structure
 **src/main/java/workflow/exceptions**: Contains exception classes to handle invalid actions and state transitions.
