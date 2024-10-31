@@ -1,7 +1,7 @@
 # Haggling Platform
 
 ## Overview
-This is a design for a haggling platform where a user can submit an offer to another user to purchase their product. An offer consists of the name of the product, the quantity the buyer is looking to buy, and the price offered (these are the “offer details”). The process runs until either user accepts the details of the offer, or cancels it. It manages offers, state transitions, and actions that users can perform. This system also allows the user to see their overall offer history or for a specific version.
+This system is designed as a haggling platform where a user can submit an offer to another user to purchase their product. An offer contains essential details such as the name of the product, the quantity the buyer wants to purchase, and the proposed price. The haggling process is a dynamic, back-and-forth exchange between users, where negotiations continue until either both users agree to the offer details or one user decides to cancel the offer.
 
 ## Project Structure
 **src/main/java/workflow/exceptions**: Contains exception classes to handle invalid actions and state transitions.
@@ -29,7 +29,22 @@ This is a design for a haggling platform where a user can submit an offer to ano
   - `DashboardRow.java`: Represents a row in a dashboard view.
 
 ## Assumptions
+  - This system supports only a single buyer and seller at this time. 
   - Offer maintains a list of offer history which is used for the dashboard view.
   - Private data for a user is associated with an offer. It is associated with a user and is stored within the offer history. 
   - All implementations for the workflow and dashboard are done in OfferService.java and DashboardService.java respectively.
-  - The system handles offers for both **buyers** and **sellers**, and the **state naming conventions** are aligned with the user roles in the offer negotiation. For example, states like `AWAITING_BUYER_ACCEPTANCE` and `AWAITING_SELLER_ACCEPTANCE` are used instead of generic names such as `AWAITING_MY_ACCEPTANCE` or `AWAITING_THEIR_ACCEPTANCE`. This role-specific naming convention is applied consistently across all states to improve clarity and ensure that the next responsible party is clearly identified during the negotiation process.
+  - The system handles offers for both **buyers** and **sellers**, and the **state naming conventions** are aligned with the user roles in the offer negotiation. For example, states like `AWAITING_BUYER_ACCEPTANCE` and `AWAITING_SELLER_ACCEPTANCE` are used instead of generic names like `AWAITING_MY_ACCEPTANCE` or `AWAITING_THEIR_ACCEPTANCE`. This role-specific naming convention is applied consistently across all states to improve clarity and ensure that the next responsible party is clearly identified during the negotiation process.
+
+## How to Run
+
+- **Clone the Repository (if using Git)**:
+    - Run the following commands to clone the repository and navigate into the project directory:
+      ```bash
+      git clone <repository-url>
+      ```
+
+- **Build the Project**:
+    - Use Gradle to build the project, resolve dependencies, and compile the source code:
+      ```bash
+      .\gradlew clean build  # For Windows
+      ```
